@@ -330,3 +330,17 @@ a.filter-btn {
   border-radius: var(--radius);
   padding: 32px 16px;
 }
+
+/* 画像添付ボタンの有効化 */
+.file-label {
+  cursor: pointer;
+  color: var(--primary);
+  background-color: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.file-label:hover {
+  background-color: #e0e7ff;
+}
