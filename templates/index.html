@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>放課後キャンバス | 高校生限定・24時間で消える掲示板</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo">🎨 放課後キャンバス</h1>
+      <p class="tagline">高校生限定・24時間で自動アーカイブされるゆるい掲示板</p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- タグ絞り込みバー -->
+    <nav class="filter-bar" aria-label="タグで絞り込み">
+      <a href="{{ url_for('index') }}" class="filter-btn {{ 'active' if selected_tag == 'all' else '' }}">
+        すべて
+      </a>
+      {% for t in tags %}
+        <a href="{{ url_for('index', tag=t) }}" class="filter-btn {{ 'active' if selected_tag == t else '' }}">
+          #{{ t }}
+        </a>
+      {% endfor %}
+    </nav>
+
+    <!-- 新規投稿フォーム -->
+    <section class="post-form-card">
+      <h2 class="section-title">✏️ 新しく投稿する</h2>
+      <form action="{{ url_for('create_post') }}" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nickname">ニックネーム</label>
+            <input type="text" id="nickname" name="nickname" placeholder="例：高2の匿名" required maxlength="20">
+          </div>
+          <div class="form-group">
+            <label for="tag">いまの気分・タグ</label>
+            <select id="tag" name="tag">
+              {% for t in tags %}
+                <option value="{{ t }}">#{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="content">本文</label>
+          <textarea id="content" name="content" rows="3" placeholder="わからない問題、部活の助っ人募集、文化祭のアイデアなど気軽にどうぞ！" required maxlength="300"></textarea>
+        </div>
+
+        <div class="form-footer">
+          <label class="file-label">
+            📷 画像を添付（発展7で有効化）
+            <input type="file" name="image" accept="image/*" disabled>
+          </label>
+          <button type="submit" class="submit-btn">投稿する</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 投稿一覧 -->
+    <section class="feed-section">
+      <h2 class="section-title">🕒 最新の投稿（24時間で消えます）</h2>
+      <div class="post-list">
+        {% if posts %}
+          {% for post in posts %}
+            <article class="post-card">
+              <div class="post-meta">
+                <span class="tag-badge {{ post.tag_class }}">#{{ post.tag }}</span>
+                <span class="author">{{ post.nickname }}</span>
+                <span class="timer">⏳ {{ post.remaining }}</span>
+              </div>
+
+              <p class="post-body">{{ post.content }}</p>
+
+              {% if post.image_url %}
+                <div class="post-image">
+                  <img src="{{ post.image_url }}" alt="添付画像">
+                </div>
+              {% endif %}
+
+              <div class="post-actions">
+                <form action="{{ url_for('react', post_id=post.id, kind='wakaru') }}" method="POST">
+                  <input type="hidden" name="tag" value="{{ selected_tag }}">
+                  <button class="reaction-btn" type="submit">
+                    👍 わかる <span class="count">{{ post.wakaru }}</span>
+                  </button>
+                </form>
+                <form action="{{ url_for('react', post_id=post.id, kind='fight') }}" method="POST">
+                  <input type="hidden" name="tag" value="{{ selected_tag }}">
+                  <button class="reaction-btn" type="submit">
+                    🔥 ファイト <span class="count">{{ post.fight }}</span>
+                  </button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <p class="empty-message">このタグの投稿はまだありません。最初の投稿をしてみよう！</p>
+        {% endif %}
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 放課後キャンバス - Powered by Flask &amp; Azure App Service</p>
+  </footer>
+
+</body>
+</html>
